@@ -19,7 +19,10 @@ public class Goods {
 	
 	public void setName(String name) {
 		this.name = name;
-		// name = name 코드상 문제는 없지만, 파라미터의 변수를 좀더 신경씀 => 후자 name = 후자 name이런 형태
+		/*
+		 name = name 코드상 문제는 없지만, 파라미터의 변수를 좀더 신경씀 
+		 => 단순히 name을 쓰게 되면 파라미터에 작성된 name을 의미함. 따라서 객체에 아무런 변화가 생기지 않음
+		*/
 		
 	}
 	

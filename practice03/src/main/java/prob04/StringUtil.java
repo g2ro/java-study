@@ -9,6 +9,12 @@ public class StringUtil {
 		}
 		
 		return result.toString();
+		
+//		String result ="";
+//		for(String str: strArr) {
+//			result += str;
+//		}
+//		return result;
 	}
 	
 }

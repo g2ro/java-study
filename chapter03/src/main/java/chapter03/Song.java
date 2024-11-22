@@ -11,6 +11,7 @@ public class Song {
 	
 	public Song(String artist, String title) {
 		this("", artist, title, "", 0, 0);
+		// 코드 재사용
 //		this.artist = artist;
 //		this.title = title;		
 //		System.out.println("some code1");
