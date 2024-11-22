@@ -1,4 +1,4 @@
-package paint;
+package com.poscodx.paint.shape;
 
 public class Rectangle extends Shape{
 	// Shape 생성 후 필드 삭제.
