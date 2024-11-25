@@ -20,7 +20,7 @@ public class MyStack {
 
 	public String pop() throws MyStackException {
 		/* 구현하기 */
-		if(this.isEmpty()) {
+		if(isEmpty()) {
 			throw new MyStackException();
 		}
 		String result = this.buffer[top--];
