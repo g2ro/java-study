@@ -15,9 +15,6 @@ public class ObjectTest02 {
 		//			부모 클래스 Object의 기본구현은 동일성(==) 비교와 같다.
 		System.out.println(p1.equals(p2));
 		System.out.println(p1.equals(p3));
-		
-		
 
 	}
-
 }
