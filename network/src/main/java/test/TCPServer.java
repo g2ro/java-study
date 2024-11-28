@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class TCPServer {
 
@@ -62,6 +63,8 @@ public class TCPServer {
 					e.printStackTrace();
 				}
 			}
+		} catch (SocketException e) {
+			System.out.println("[server] Socket Exception:" + e);
 		} catch (IOException e) {
 			System.out.println("[server] error:" + e);
 		} finally {
