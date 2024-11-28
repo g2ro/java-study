@@ -22,7 +22,7 @@ public class NSLookup {
 		} 
 		
 		scanner.close();
-
+		
 	}
-
+	
 }
