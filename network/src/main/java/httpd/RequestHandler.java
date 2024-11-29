@@ -11,6 +11,7 @@ import java.nio.file.Files;
 
 public class RequestHandler extends Thread {
 	private Socket socket;
+	private final String DOCUMENT_ROOT = "./webapp";
 
 	public RequestHandler(Socket socket) {
 		this.socket = socket;
@@ -58,7 +59,8 @@ public class RequestHandler extends Thread {
 			} else {
 				// method : POST, DELETE, PUT, HEAD, CONNECT, ...
 				// SimpleHttpServer에서는 무시(400 Bad request)
-				
+//				responseStaticResources400(outputStream, tokens[1], tokens[2]);
+				response400Error(outputStream, tokens[2]);
 			}
 			
 			
@@ -83,15 +85,25 @@ public class RequestHandler extends Thread {
 			}
 		}
 	}
+	
 
 	private void responseStaticResources(OutputStream os, String url, String protocol) throws IOException{
 		// default(welcom) file
 		if("/".equals(url)) {
 			url = "/index.html";
 		}
-		File file = new File("./webapp/" + url);
+		File file = new File(DOCUMENT_ROOT + url);
 		if(!file.exists()) {
 			// 404 response
+			response404Error(os, protocol);
+			
+//			File file404 = new File(DOCUMENT_ROOT + "/error/404.html");
+//			byte[] body = Files.readAllBytes(file404.toPath());
+//			String contentType = Files.probeContentType(file404.toPath());
+//			os.write("HTTP/1.1 404 NOT FOUND\n".getBytes("UTF-8"));
+//			os.write(("Content-Type:" + contentType +"; charset=utf-8\n").getBytes("UTF-8"));
+//			os.write("\n".getBytes());
+//			os.write(body); // body가 없다면, 브라우져가 재공하는 에러 html로 이동한다.
 			return;
 		}
 		
@@ -99,10 +111,40 @@ public class RequestHandler extends Thread {
 		byte[] body = Files.readAllBytes(file.toPath()); //try_catch를 나를 부른 쪽으로 우회(회피하는 방법) => throws IOException
 		String contentType = Files.probeContentType(file.toPath()); // contentType을 알아낼 수 있다. SMTP=메일 프로토콜
 		
-		os.write("HTTP/1.1 200 OK\n".getBytes("UTF-8"));
+		os.write((protocol +" 200 OK\n").getBytes("UTF-8"));
 		os.write(("Content-Type:" + contentType +"; charset=utf-8\n").getBytes("UTF-8"));
 		os.write("\n".getBytes());
 		os.write(body);
+	}
+	private void response404Error(OutputStream os, String protocol) {
+		/*
+		 HTTP/1.1 404 File Not Found\n
+		 Content-Type: text/html; charset=utf-8\n
+		 \n
+		 
+		 */
+		
+	}
+	
+	private void response400Error(OutputStream outputStream, String string) {
+		/*
+		 HTTP/1.1 400 Bod Request\n
+		 Content-Type: text/html; charset=utf-8\n
+		 \n
+		 
+		 */
+		
+	}
+	
+	private void responseStaticResources400(OutputStream os, String url, String protocol) throws IOException{
+		File file400 = new File(DOCUMENT_ROOT + "/error/400.html");
+		byte[] body = Files.readAllBytes(file400.toPath());
+		String contentType = Files.probeContentType(file400.toPath());
+		os.write("HTTP/1.1 400 bad request\n".getBytes("UTF-8"));
+		os.write(("Content-Type:" + contentType +"; charset=utf-8\n").getBytes("UTF-8"));
+		os.write("\n".getBytes());
+		os.write(body);
+		return;
 	}
 
 	public void consoleLog(String message) {
