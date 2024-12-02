@@ -79,6 +79,7 @@ public class ChatServerThread extends Thread {
 	}
 	
 	private void quit(PrintWriter pw) {
+		((PrintWriter)pw).println("quit ok");
 		writerPool.remove(pw);
 	}
 
@@ -88,6 +89,7 @@ public class ChatServerThread extends Thread {
 		msg(enter);
 		writerPool.add(pw);
 		pw.println("채팅방에 입장했습니다.");
+		pw.println("join:finish");
 	}
 	
 	public void msg(String s) {

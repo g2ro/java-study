@@ -30,7 +30,7 @@ public class ChatClient {
 					String text = "msg:" + line;
 					pw.println(text);
 				}
-				pw.println(line);
+//				pw.println(line);
 
 				
 				
