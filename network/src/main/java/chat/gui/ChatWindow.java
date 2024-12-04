@@ -28,7 +28,7 @@ import java.util.Scanner;
 import chat.ChatServer;
 
 public class ChatWindow {
-	public final static String IPaddr = "127.0.0.1"; 
+	public final static String IPaddr = "127.0.0.1";
 	private PrintWriter pw;
 	private BufferedReader br;
 	private Socket socket = new Socket();
@@ -57,14 +57,14 @@ public class ChatWindow {
 			}
 		});
 //		buttonSend.addActionListener(actionEvent -> {});
-		
+
 		// Textfield
 		textField.setColumns(80);
 		textField.addKeyListener(new KeyAdapter() {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				char keyChar = e.getKeyChar();
-				if(keyChar == KeyEvent.VK_ENTER) {
+				if (keyChar == KeyEvent.VK_ENTER) {
 					sendMessage();
 				}
 			}
@@ -89,92 +89,98 @@ public class ChatWindow {
 		frame.pack();
 		// 1. 서버 연결 작업
 		// System.out.println(frame.getTitle());
-		
-		
+
 		try {
 			socket.connect(new InetSocketAddress(IPaddr, ChatServer.PORT), 0);
-			
+
 			// 2. IO Stream Setting
-			pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"),true); // 보내는 기능.
-
+			pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"), true); // 보내는 기능.
+			pw.println("join:" + frame.getTitle());
 			new ChatClientThread(socket).start();
-			joinMessage(pw, frame.getTitle());
 
-			
-		} catch (IOException e1) {
-			System.out.println("[error] : " + e1);
+		} catch (IOException e) {
+			ClientLog("[error] : " + e);
 		}
-		
-		
-		
+
 		// 3. JOIN Protocol
 		// 4. ChatClientThread 생성
-	}
-	private void joinMessage(PrintWriter pw, String name) {
-		pw.println("join:" + name);
-		try {
-			String joinmsg = br.readLine();
-			System.out.println(joinmsg);
-		} catch (IOException e) {
-			System.out.println("error" + e);
-		}
 	}
 	
 	private void sendMessage() {
 		String message = textField.getText();
 //		System.out.println("메시지를 보내는 프로토콜 구현 !: " + message);
 		pw.println("msg:" + message);
-		
+
 		textField.setText(""); // 보낸 뒤 text필드 비우기
 		textField.requestFocus(); // 커서 설정
-		
-		//ChatClientThread에서 서버로 부터 받은 메세지가 있다고 치고~
-		//updateTextArea("아무개:" + message); // 나중에 지워야함.	
+
+		// ChatClientThread에서 서버로 부터 받은 메세지가 있다고 치고~
+		// updateTextArea("아무개:" + message); // 나중에 지워야함.
 	}
-	
+
 	private void updateTextArea(String message) {
 		textArea.append(message);
 		textArea.append("\n");
 	}
+
 	private void finish() {
 		// quit protocol 구현
 		// java program 종료 => exit
 		// exit java application
-		if(socket != null && !socket.isClosed()) {
+		if (socket != null && !socket.isClosed()) {
 			try {
 				pw.println("quit");
-				if(br.readLine().equals("quit ok")) {
+				if ("quit ok".equals(br.readLine())) {
 					socket.close();
+				} else {
+					System.out.println("종료가 정상적으로 작동되지 않았습니다.");
 				}
-			}catch(IOException e) {
+			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		
+
 		System.exit(0);
 	}
-	private class ChatClientThread extends Thread{
-		private Socket socket;
 
-		public ChatClientThread(Socket socket) {
-			this.socket = socket;
-		}
+	private class ChatClientThread extends Thread {
+        private Socket socket;
 
-		@Override
-		public void run() {
-			try {
-				br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
-				while(true) {
-					String data = br.readLine();
-					updateTextArea(data);
-				}
-			} catch (UnsupportedEncodingException e) {
-				System.out.println("error" + e);
-			} catch (IOException e) {
-				System.out.println("error" + e);
-			}
-			
-			
-		}
-	}
+        public ChatClientThread(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
+
+                // 서버로부터 초기 메시지 수신
+                String response = br.readLine();
+                if (!"join:finish".equals(response)) {
+                    System.out.println("연결 실패: 서버에서 'join:finish' 메시지를 받지 못했습니다.");
+                    socket.close();
+                    System.exit(0);
+                }
+
+                // 메시지 수신 루프
+                while (true) {
+                    String data = br.readLine();
+                    if (data == null) {
+                        System.out.println("서버와의 연결이 종료되었습니다.");
+                        break;
+                    }
+                    updateTextArea(data);
+                }
+
+            } catch (IOException e) {
+                ClientLog("error: " + e.getMessage());
+            } finally {
+                System.out.println("클라이언트 쓰레드 종료");
+            }
+        }  
+    }
+	public static void ClientLog(String message) {
+        System.out.println("[Client] " + message);
+    }
 }

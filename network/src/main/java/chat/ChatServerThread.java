@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.net.Socket;
+import java.util.Base64;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,25 +42,19 @@ public class ChatServerThread extends Thread {
 				String data = br.readLine(); // client 
 				// join, msg, quit => client 메시지 보낼지 
 				
-				
+				if(data == null) {
+					ChatServer.log("클라이언트로 부터 연결 끊김");
+					break;
+				}
 				String [] tokens = data.split(":");
 				
 				
 				if("join".equals(tokens[0])) {
-					setNickname(tokens[1]);
 					join(tokens[1], pw);
-				}
-				else if("msg".equals(tokens[0])) {
-					String nickname = getNickname();
-					String message =  nickname + ":" + tokens[1];
-					msg(message);
-				}
-				else if("quit".equals(tokens[0])) {
-					String nickname = getNickname();
-					String message =  nickname + "님이 퇴장했습니다.";
-					msg(message);
+				} else if("msg".equals(tokens[0])) {
+					msg(nickname + ":" + tokens[1]);
+				} else if("quit".equals(tokens[0])) {
 					quit(pw);
-					break;
 				}
 				
 			}
@@ -71,7 +66,6 @@ public class ChatServerThread extends Thread {
 				try {
 					socket.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -79,17 +73,18 @@ public class ChatServerThread extends Thread {
 	}
 	
 	private void quit(PrintWriter pw) {
+		msg(nickname + "님이 퇴장했습니다.");
 		((PrintWriter)pw).println("quit ok");
 		writerPool.remove(pw);
 	}
 
-	public void join(String s, PrintWriter pw) {
-		String nickname = getNickname();
+	public void join(String nickname, PrintWriter pw) {
+		setNickname(nickname);
 		String enter = nickname + "님이 참가했습니다.";
+		pw.println("join:finish");
+		pw.println("채팅방에 입장했습니다.");
 		msg(enter);
 		writerPool.add(pw);
-		pw.println("채팅방에 입장했습니다.");
-		pw.println("join:finish");
 	}
 	
 	public void msg(String s) {

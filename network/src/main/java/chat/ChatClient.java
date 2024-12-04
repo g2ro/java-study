@@ -17,10 +17,11 @@ public class ChatClient {
 			new ChatClientThread(socket).start();
 			PrintWriter pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"),true); // 보내는 기능.
 			
-			System.out.print("닉네임 :");
+			System.out.print("닉네임>>");
 			String nickname = scanner.nextLine();
 			
 			pw.println("join:" + nickname);
+			
 			while(true) {
 				String line = scanner.nextLine();
 				if(line.equals("quit")) {
@@ -30,8 +31,6 @@ public class ChatClient {
 					String text = "msg:" + line;
 					pw.println(text);
 				}
-//				pw.println(line);
-
 				
 				
 			}

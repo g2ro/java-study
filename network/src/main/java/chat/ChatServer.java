@@ -12,7 +12,6 @@ public class ChatServer {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket();
-			
 			serverSocket.bind(new InetSocketAddress("0.0.0.0", PORT));
 			System.out.println("Server start [" + PORT + "]");
 			while(true) {
@@ -25,17 +24,18 @@ public class ChatServer {
 			}
 			
 		} catch (IOException e) {
-			System.out.println("error" + e);
+			log("error" + e);
 		} finally {
 			if(serverSocket != null && !serverSocket.isClosed()) {
 				try {
 					serverSocket.close();
 				} catch (IOException e) {
-					System.out.println("error" + e);
+					log("error" + e);
 				}
 			}
 		}
-
 	}
-
+	public static void log(String message) {
+		System.out.println("[Server]:" + message);
+	}
 }
