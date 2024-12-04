@@ -16,14 +16,11 @@ import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
-import java.util.Scanner;
+import java.util.Base64;
 
 import chat.ChatServer;
 
@@ -95,7 +92,7 @@ public class ChatWindow {
 
 			// 2. IO Stream Setting
 			pw = new PrintWriter(new OutputStreamWriter(socket.getOutputStream(), "utf-8"), true); // 보내는 기능.
-			pw.println("join:" + frame.getTitle());
+			pw.println(encodeBase64("join:" + frame.getTitle()));
 			new ChatClientThread(socket).start();
 
 		} catch (IOException e) {
@@ -109,7 +106,7 @@ public class ChatWindow {
 	private void sendMessage() {
 		String message = textField.getText();
 //		System.out.println("메시지를 보내는 프로토콜 구현 !: " + message);
-		pw.println("msg:" + message);
+		pw.println(encodeBase64("msg:" + message));
 
 		textField.setText(""); // 보낸 뒤 text필드 비우기
 		textField.requestFocus(); // 커서 설정
@@ -129,8 +126,8 @@ public class ChatWindow {
 		// exit java application
 		if (socket != null && !socket.isClosed()) {
 			try {
-				pw.println("quit");
-				if ("quit ok".equals(br.readLine())) {
+				pw.println(encodeBase64("quit"));
+				if ("quit ok".equals(decodeBase64(br.readLine()))) {
 					socket.close();
 				} else {
 					System.out.println("종료가 정상적으로 작동되지 않았습니다.");
@@ -156,7 +153,7 @@ public class ChatWindow {
                 br = new BufferedReader(new InputStreamReader(socket.getInputStream(), "utf-8"));
 
                 // 서버로부터 초기 메시지 수신
-                String response = br.readLine();
+                String response = decodeBase64(br.readLine());
                 if (!"join:finish".equals(response)) {
                     System.out.println("연결 실패: 서버에서 'join:finish' 메시지를 받지 못했습니다.");
                     socket.close();
@@ -170,7 +167,7 @@ public class ChatWindow {
                         System.out.println("서버와의 연결이 종료되었습니다.");
                         break;
                     }
-                    updateTextArea(data);
+                    updateTextArea(decodeBase64(data));
                 }
 
             } catch (IOException e) {
@@ -179,6 +176,15 @@ public class ChatWindow {
                 System.out.println("클라이언트 쓰레드 종료");
             }
         }  
+    }
+	// Base64 인코딩 메서드
+    private String encodeBase64(String message) {
+        return Base64.getEncoder().encodeToString(message.getBytes());
+    }
+
+    // Base64 디코딩 메서드
+    private String decodeBase64(String encodedMessage) {
+        return new String(Base64.getDecoder().decode(encodedMessage));
     }
 	public static void ClientLog(String message) {
         System.out.println("[Client] " + message);

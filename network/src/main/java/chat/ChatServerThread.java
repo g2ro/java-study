@@ -46,7 +46,8 @@ public class ChatServerThread extends Thread {
 					ChatServer.log("클라이언트로 부터 연결 끊김");
 					break;
 				}
-				String [] tokens = data.split(":");
+				String decodedData = new String(Base64.getDecoder().decode(data), "utf-8");
+				String [] tokens = decodedData.split(":");
 				
 				
 				if("join".equals(tokens[0])) {
@@ -73,16 +74,20 @@ public class ChatServerThread extends Thread {
 	}
 	
 	private void quit(PrintWriter pw) {
-		msg(nickname + "님이 퇴장했습니다.");
-		((PrintWriter)pw).println("quit ok");
-		writerPool.remove(pw);
+	    msg(nickname + "님이 퇴장했습니다.");
+	    try {
+	        pw.println(encodeBase64("quit ok")); // Base64로 인코딩 후 메시지 전송
+	        writerPool.remove(pw);
+	    } catch (Exception e) {
+	        ChatServer.log("error" + e);
+	    }
 	}
 
 	public void join(String nickname, PrintWriter pw) {
 		setNickname(nickname);
 		String enter = nickname + "님이 참가했습니다.";
-		pw.println("join:finish");
-		pw.println("채팅방에 입장했습니다.");
+		pw.println(encodeBase64("join:finish"));
+		pw.println(encodeBase64("채팅방에 입장했습니다."));
 		msg(enter);
 		writerPool.add(pw);
 	}
@@ -90,9 +95,12 @@ public class ChatServerThread extends Thread {
 	public void msg(String s) {
 		synchronized (writerPool) {
 			for(Writer pw : writerPool) {
-				((PrintWriter)pw).println(s);
+				((PrintWriter)pw).println(encodeBase64(s));
 			}
 		}
-		
 	}
+	// Base64 인코딩 메서드
+    private String encodeBase64(String message) {
+        return Base64.getEncoder().encodeToString(message.getBytes());
+    }
 }
