@@ -12,7 +12,7 @@ public class ChatServer {
 		ServerSocket serverSocket = null;
 		try {
 			serverSocket = new ServerSocket();
-			serverSocket.bind(new InetSocketAddress("0.0.0.0", PORT));
+			serverSocket.bind(new InetSocketAddress("0.0.0.0", PORT)); //전체 ip 접근 허용 및 port 바인딩
 			System.out.println("Server start [" + PORT + "]");
 			while(true) {
 				Socket socket = new Socket();
